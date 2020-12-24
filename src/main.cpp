@@ -15,7 +15,8 @@ uint32_t lastLoraReceived = 0;
 
 void onReceive(int bytes);
 
-void setup() {
+void setup()
+{
 	// put your setup code here, to run once:
 	Serial.begin(115200);
 
@@ -23,30 +24,33 @@ void setup() {
 	LoRa.begin(868E6);
 	LoRa.sleep();
 	LoRa.enableCrc();
-    LoRa.setTxPower(20, PA_OUTPUT_PA_BOOST_PIN);
-    LoRa.setSignalBandwidth(250E3);
-    LoRa.setCodingRate4(6);
-    LoRa.idle();
+	LoRa.setTxPower(20, PA_OUTPUT_PA_BOOST_PIN);
+	LoRa.setSignalBandwidth(250E3);
+	LoRa.setCodingRate4(6);
+	LoRa.idle();
 	LoRa.onReceive(onReceive);
 	LoRa.receive();
 
 	pinMode(BUILTIN_LED, OUTPUT);
 }
 
-void loop() {
-	if((availableLoraBytes > 0) && (availableLoraBytes < MAX_PACKET_SIZE))
+void loop()
+{
+	if ((availableLoraBytes > 0) && (availableLoraBytes < MAX_PACKET_SIZE))
 	{
 		loraRxBytes = LoRa.readBytes(loraRxBuffer, availableLoraBytes);
-		Serial.print("RSSI: "); Serial.print(157 - constrain(LoRa.packetRssi() * -1, 0, 157));
-		Serial.print(" SNR: "); Serial.println(LoRa.packetSnr());
+		Serial.print("RSSI: ");
+		Serial.print(157 - constrain(LoRa.packetRssi() * -1, 0, 157));
+		Serial.print(" SNR: ");
+		Serial.println(LoRa.packetSnr());
 		Serial.write(loraRxBuffer, loraRxBytes);
 		Serial.println();
 		availableLoraBytes = 0;
 	}
 
-	if(Serial.available() || serialRxBytes)
+	if (Serial.available() || serialRxBytes)
 	{
-		if(serialRxBytes == 0)
+		if (serialRxBytes == 0)
 		{
 			serialRxBytes = Serial.readBytes(serialRxBuffer, Serial.available());
 		}
@@ -58,14 +62,14 @@ void loop() {
 		LoRa.receive();
 	}
 
-	if(nextTaskAutoTransmit < millis())
+	if (nextTaskAutoTransmit < millis())
 	{
-		sprintf((char *) serialRxBuffer, "ping");
+		sprintf((char *)serialRxBuffer, "ping");
 		serialRxBytes = 4;
 		nextTaskAutoTransmit = millis() + TASK_AUTO_TRANSMIT_RATE;
 	}
 
-	if((lastLoraReceived + LORA_RX_TIMEOUT) > millis())
+	if ((lastLoraReceived + LORA_RX_TIMEOUT) > millis())
 	{
 		//timeout
 		digitalWrite(BUILTIN_LED, HIGH);
